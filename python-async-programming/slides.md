@@ -2,7 +2,7 @@
 theme: default
 paginate: true
 marp: true
-footer: "Jkx"
+footer: "Jérôme Kerdreux"
 ---
 
 # Programmation asynchrone avancée en Python
@@ -30,8 +30,7 @@ class Hello(gevent.Greenlet):
     def _run(self):
         while 1:
             print(f"Hello {self.name}")
-            gevent.sleep(2)
-
+            gevent.sleep(len(self.name))
 
 Hello.spawn('Bob')
 Hello.spawn('Alice')
@@ -74,9 +73,9 @@ def test():
 ```
 
 ---
-## asyncio - create_task
+## Asyncio - create_task
 - succède à twisted, asyncore, async ...
-- mots clés : async / await
+- mots clés : **async / await**
 - API ~ stable depuis Py3.6
 
 ```py
@@ -91,15 +90,35 @@ async def main():
 	# Tasks are used to schedule coroutines concurrently.
     t1 = asyncio.create_task(hello('Bob'))
     t2 = asyncio.create_task(hello('Alice'))
-
     await t1
     await t2
 
 asyncio.run(main())
 ```
 
+
+---
+## Asyncio - blue or red
+- une coroutine peut retrourner un résultat 
+```py
+fact = await factoriel(20)
+```
+- il existe quelques autres fonctions utiles : 
+```py 
+- loop = asyncio.new_event_loop()
+- loop.create_task(foo())
+- loop.run_until_complete(main())
+- asyncio.all_tasks()
+```
+
+- WARNING : pas de await dans le constructeur (```__init__```)
+- pas de await en dehors d'une fonction (REPL)
+- blue / red functions => [What Color is Your Function? ](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/)
+
+
+
 ___
-## asyncio - Event
+## Asyncio - Event
 ```py
 import asyncio
 
@@ -125,27 +144,26 @@ asyncio.run(main())
 
 
 ---
-## asyncio - blue or red
-- une coroutine peut retrourner un résultat 
+## Asyncio - Lock
 ```py
-fact = await factoriel(20)
-```
-- il existe quelques autres fonctions utiles : 
-```py 
-- loop = asyncio.new_event_loop()
-- loop.create_task(foo())
-- loop.run_until_complete(main())
-- asyncio.all_tasks()
-```
 
+lock = asyncio.Lock()
 
-- WARNING : pas de await dans le constructeur (```__init__```)
-- pas de await en dehors d'une fonction (REPL)
-- blue / red functions => [What Color is Your Function? ](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/)
+async def write():
+    while event.is_set():
+        async with lock:
+            values.append(random.randint(0,500))
+
+async def read():
+    global values
+    async with lock:
+        print(values)
+        values = []
+```
 
 
 ---
-## asyncio - IPython
+## Asyncio - IPython
 ```py
 import asyncio
 import IPython
@@ -171,3 +189,44 @@ jobs.new(run)
 IPython.embed(banner1="=Shell=", banner2="\n", colors="Linux", separate_in = '', autoawait = True)
 event.set()
 ```
+
+
+---
+## Asyncio - modules
+### aiohttp
+```py
+import asyncio
+import aiohttp
+
+async def test():
+    session = aiohttp.ClientSession()
+    try:
+        response = await session.get('http://python.org')
+        print(response.headers)
+        await session.close()        
+    except aiohttp.ClientConnectorError:
+        print('Error')
+
+asyncio.run(test())
+```
+
+---
+## Asyncio - modules
+### aioconsole 
+```py
+server = await aioconsole.start_interactive_server(host='localhost', port=6666)
+```
+
+```sh 
+$ rlwrap nc localhost 6666
+```
+
+### aiotimeout 
+```py
+from aiotimeout import timeout
+
+# Will raise an asyncio.TimeoutError
+with timeout(1):
+    await asyncio.sleep(1.5)
+```
+
