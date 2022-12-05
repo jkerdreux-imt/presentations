@@ -163,6 +163,33 @@ async def read():
 
 
 ---
+## Asyncio - Queue
+```py
+import asyncio
+import random
+
+queue = asyncio.Queue()
+
+async def push():
+    while 1:
+        await queue.put(random.randint(0,500))
+        await asyncio.sleep(1)
+
+async def pull():
+    while 1:
+        r = await queue.get()
+        print(r)
+
+async def main():
+    t1 = asyncio.create_task(push())
+    t2 = asyncio.create_task(pull())
+    await t1
+    await t2
+
+asyncio.run(main())
+```
+
+---
 ## Asyncio - IPython
 ```py
 import asyncio
