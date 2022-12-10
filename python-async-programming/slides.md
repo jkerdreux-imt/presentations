@@ -148,6 +148,7 @@ asyncio.run(main())
 ```py
 
 lock = asyncio.Lock()
+values = []
 
 async def write():
     while event.is_set():
